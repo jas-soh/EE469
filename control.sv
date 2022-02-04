@@ -1,0 +1,172 @@
+module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrTaken, UncondBr, ALUOp);
+	input logic [31:0] instr;
+	input logic branch, zeroFlag;
+	output logic Reg2Loc, ALUSrc,
+		MemToReg, RegWrite,
+		MemWrite, BrTaken,
+		UncondBr;
+	output logic [2:0] ALUOp;
+	output logic setFlag;
+	
+	always_comb begin
+		// ---- R type ----
+		// ADDI
+		// ADDI Rd, Rn, Imm12: Reg[Rd] = Reg[Rn] + ZeroExtend(Imm12). 
+		else if (instr[31:22] == 10'h244) begin
+			Reg2Loc = 1'bx;
+			ALUSrc = 1'b1;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b100;
+			// ----
+			setFlag = 0;
+		end
+
+		// ADDS
+		// ADDS Rd, Rn, Rm: Reg[Rd] = Reg[Rn] + Reg[Rm]. Set flags.
+		else if (instr[31:21] == 11'h558) begin
+			Reg2Loc = 1'b1;
+			ALUSrc = 1'b0;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b100;
+			// ----
+			setFlag = 1;
+		end
+
+		// AND
+		// AND Rd, Rn, Rm: Reg[Rd] = Reg[Rn] & Reg[Rm]. 
+		if (instr[31:21] == 11'h450) begin
+			Reg2Loc = 1'b1;
+			ALUSrc = 1'b0;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b010;
+			// ----
+			setFlag = 0;
+		end
+		
+		// LDUR
+		// LDUR Rd, [Rn, #Imm9]: Reg[Rd] = Mem[Reg[Rn] + SignExtend(Imm9)]. 
+		else if (instr[31:21] == 11'h7C2) begin
+			Reg2Loc = 1'bx;
+			ALUSrc = 1'b1;
+			MemToReg = 1'b1;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b010;
+			// ----
+			setFlag = 0;
+		end
+		
+		// ORR
+		else if (instr[31:21] == 11'h550) begin
+			Reg2Loc = 1'b1;
+			ALUSrc = 1'b0;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b101;
+			// ----
+			setFlag = 0;
+		end
+
+		// LSR
+		// LSR Rd, Rn, Shamt: Reg[Rd] = Reg[Rn] >> Shamt 
+		else if (instr[31:21] == 11'h69A) begin
+			Reg2Loc = 1'bx;
+			ALUSrc = 1'bx;
+			MemToReg = 1'bx;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'bxxx;
+			// ----
+			setFlag = 0;
+		end
+
+		// STUR 
+		// STUR Rd, [Rn, #Imm9]: Mem[Reg[Rn] + SignExtend(Imm9)] = Reg[Rd].
+		else if (instr == 11'h7C0) begin
+			Reg2Loc = 1'b0;
+			ALUSrc = 1'b1;
+			MemToReg = 1'bx;
+			RegWrite = 1'b0;
+			MemWrite = 1'b1;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b010;
+			// ----
+			setFlag = 0;
+		end
+
+		// SUBS
+		// SUBS Rd, Rn, Rm: Reg[Rd] = Reg[Rn] - Reg[Rm].  Set flags. 
+		else if (instr == 11'h758) begin
+			Reg2Loc = 1'b1;
+			ALUSrc = 1'b0;
+			MemToReg = 1'b0;
+			RegWrite = 1'b1;
+			MemWrite = 1'b0;
+			BrTaken = 1'b0;
+			UncondBr = 1'bx;
+			ALUOp = 3'b011;
+			// -----
+			setFlag = 1;
+		end
+		
+		
+		// ---- CB-type ----
+		// B
+		else if (instr[31:26] == 6'h05) begin
+			Reg2Loc = 1'bx;
+			ALUSrc = 1'bx;
+			MemToReg = 1'bx;
+			RegWrite = 1'b0;
+			MemWrite = 1'b0;
+			BrTaken = 1'b1;
+			UncondBr = 1'b1;
+			ALUOp = 3'bx;
+		end
+
+		// B.LT
+		else if ((instr[31:24] == 8'h54) && (instr[4:0] == 5'h0B)) begin
+			Reg2Loc = 1'bx;
+			ALUSrc = 1'bx;
+			MemToReg = 1'bx;
+			RegWrite = 1'b0;
+			MemWrite = 1'b0;
+			BrTaken = branch;
+			UncondBr = 1'b0;
+			ALUOp = 3'bx;
+		end
+		
+		// CBZ
+		else begin // (instr[31:26] == 6'hB4) begin:
+			assert (instr[31:24] == 8'hB4);
+			Reg2Loc = 1'b0;
+			ALUSrc = 1'b0;
+			MemToReg = 1'bx;
+			RegWrite = 1'b0;
+			MemWrite = 1'b0;
+			BrTaken = zeroFlag; // zero flag
+			UncondBr = 1'b0;
+			ALUOp = 3'b000;
+		end
+	end
+	
+endmodule 
