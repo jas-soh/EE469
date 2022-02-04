@@ -1,4 +1,4 @@
-module program_counter (instr_addr, instruction, UncondBr, BrTaken);
+module program_counter (instr_addr, instruction, BrTaken);
 	input logic [63:0] instr_addr; // address of instruction
 	input logic [31:0] instruction;
 	input logic UncondBr, BrTaken; // control inputs
