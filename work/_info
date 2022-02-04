@@ -10,15 +10,15 @@ cModel Technology
 Z0 dC:/Users/jasmi/Documents/EE/EE469Lab
 vcontrol
 Z1 DXx6 sv_std 3 std 0 22 AD7iAPLo6nTIKk<N0eo=D3
-Z2 !s110 1644009266
+Z2 !s110 1644010082
 !i10b 1
-!s100 IRAOkg^PSoj^ga:U@YC0^1
-I^=dSeC:k[ecQok[mH<A;02
+!s100 Y;TI@=TnodM@Ogi]3=7I92
+IW1FAe]C]jBe_P=F=_[[B[2
 Z3 VDg1SIo80bB@j0V0VzS_@n1
 Z4 !s105 control_sv_unit
 S1
 R0
-Z5 w1644009118
+Z5 w1644010066
 Z6 8./control.sv
 Z7 F./control.sv
 L0 1
@@ -26,7 +26,7 @@ Z8 OV;L;10.5b;63
 r1
 !s85 0
 31
-Z9 !s108 1644009266.000000
+Z9 !s108 1644010082.000000
 Z10 !s107 ./control.sv|
 Z11 !s90 -reportprogress|300|./control.sv|
 !i113 1
@@ -35,8 +35,8 @@ vcontrol_testbench
 R1
 R2
 !i10b 1
-!s100 D;TZUVzJ<g3@dX6o7[hCX2
-Ih3<B:2cK3Vj`NIkFj81C<2
+!s100 mKO[U4gXYB=JP4^^H4kZO0
+IVSLfLWZDLI58]KF:l0mWz2
 R3
 R4
 S1
@@ -44,7 +44,7 @@ R0
 R5
 R6
 R7
-L0 184
+L0 183
 R8
 r1
 !s85 0
@@ -56,47 +56,47 @@ R11
 R12
 vprogram_counter
 R1
-Z13 !s110 1644009267
+R2
 !i10b 1
 !s100 dS]9i59OhAF7BEIiC@JJ21
 IW5I>>lF2dAUBlU]d`mi=T2
 R3
-Z14 !s105 program_counter_sv_unit
+Z13 !s105 program_counter_sv_unit
 S1
 R0
-Z15 w1644009226
-Z16 8./program_counter.sv
-Z17 F./program_counter.sv
+Z14 w1644009226
+Z15 8./program_counter.sv
+Z16 F./program_counter.sv
 L0 1
 R8
 r1
 !s85 0
 31
 R9
-Z18 !s107 ./program_counter.sv|
-Z19 !s90 -reportprogress|300|./program_counter.sv|
+Z17 !s107 ./program_counter.sv|
+Z18 !s90 -reportprogress|300|./program_counter.sv|
 !i113 1
 R12
 vprogram_counter_testbench
 R1
-R13
+R2
 !i10b 1
 !s100 ig[VZlijM]UdSn_cS44ej1
 IXYaFi@UX:^V[M6bloemEK0
 R3
-R14
+R13
 S1
 R0
+R14
 R15
 R16
-R17
 L0 33
 R8
 r1
 !s85 0
 31
 R9
+R17
 R18
-R19
 !i113 1
 R12

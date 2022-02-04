@@ -164,7 +164,6 @@ module control(instr, branch, zeroFlag, Reg2Loc, ALUSrc, MemToReg, RegWrite, Mem
 		// CBZ
         // CBZ Rd, Imm19: If (Reg[Rd] == 0) PC = PC + SignExtend(Imm19<<2). 
 		else begin // (instr[31:26] == 6'hB4) begin:
-			assert (instr[31:24] == 8'hB4);
 			Reg2Loc = 1'b0;
 			ALUSrc = 1'b0;
 			MemToReg = 1'bx;
@@ -197,29 +196,24 @@ module control_testbench ();
         // ADDI
 		// ADDI Rd, Rn, Imm12: Reg[Rd] = Reg[Rn] + ZeroExtend(Imm12)
         instr = 32'b10010001000000000000001111100000; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X0, X31, #0     // X0 = 0
-        assert (Reg2Loc == 1'bx && ALUSrc == 1'b1 && MemToReg == 1'b0 && RegWrite == 1'b1
-			&& MemWrite == 1'b0 && BrTaken == 1'b0 && UncondBr == 1'bx && ALUOp == 3'b100 
-            && setFlag == 0);
+        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
+			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
         instr = 32'b10010001000000000000010000000001; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X1, X0, #1      // X1 = 1
-        assert (Reg2Loc == 1'bx && ALUSrc == 1'b1 && MemToReg == 1'b0 && RegWrite == 1'b1
-			&& MemWrite == 1'b0 && BrTaken == 1'b0 && UncondBr == 1'bx && ALUOp == 3'b100 
-            && setFlag == 0);
+        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
+			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
         instr = 32'b10010001000000000000010000100010; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X2, X1, #1      // X2 = 2
-        assert (Reg2Loc == 1'bx && ALUSrc == 1'b1 && MemToReg == 1'b0 && RegWrite == 1'b1
-			&& MemWrite == 1'b0 && BrTaken == 1'b0 && UncondBr == 1'bx && ALUOp == 3'b100 
-            && setFlag == 0);
+        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
+			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
         instr = 32'b10010001000000000000100000100011; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X3, X1, #2      // X3 = 3
-        assert (Reg2Loc == 1'bx && ALUSrc == 1'b1 && MemToReg == 1'b0 && RegWrite == 1'b1
-			&& MemWrite == 1'b0 && BrTaken == 1'b0 && UncondBr == 1'bx && ALUOp == 3'b100 
-            && setFlag == 0);
+        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
+			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
         instr = 32'b10010001000000000001000000000100; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X4, X0, #4      // X4 = 4
-        assert (Reg2Loc == 1'bx && ALUSrc == 1'b1 && MemToReg == 1'b0 && RegWrite == 1'b1
-			&& MemWrite == 1'b0 && BrTaken == 1'b0 && UncondBr == 1'bx && ALUOp == 3'b100 
-            && setFlag == 0);
+        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
+			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
     end
 
