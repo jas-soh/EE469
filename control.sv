@@ -101,7 +101,7 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 
 		// STUR 
 		// STUR Rd, [Rn, #Imm9]: Mem[Reg[Rn] + SignExtend(Imm9)] = Reg[Rd].
-		else if (instr == 11'h7C0) begin
+		else if (instr[31:21] == 11'h7C0) begin
 			Reg2Loc = 1'b0;
 			ALUSrc = 1'b1;
 			MemToReg = 1'bx;
@@ -116,7 +116,7 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 
 		// SUBS
 		// SUBS Rd, Rn, Rm: Reg[Rd] = Reg[Rn] - Reg[Rm].  Set flags. 
-		else if (instr == 11'h758) begin
+		else if (instr[31:21] == 11'h758) begin
 			Reg2Loc = 1'b1;
 			ALUSrc = 1'b0;
 			MemToReg = 1'b0;
@@ -132,6 +132,7 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 		
 		// ---- CB-type ----
 		// B
+        // B Imm26: PC = PC + SignExtend(Imm26 << 2). 
 		else if (instr[31:26] == 6'h05) begin
 			Reg2Loc = 1'bx;
 			ALUSrc = 1'bx;
@@ -141,9 +142,12 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 			BrTaken = 1'b1;
 			UncondBr = 1'b1;
 			ALUOp = 3'bx;
+            // ----
+            setFlag = 0;
 		end
 
 		// B.LT
+        // B.LT Imm19: If (flags.negative != flags.overflow) PC = PC + SignExtend(Imm19<<2). 
 		else if ((instr[31:24] == 8'h54) && (instr[4:0] == 5'h0B)) begin
 			Reg2Loc = 1'bx;
 			ALUSrc = 1'bx;
@@ -153,9 +157,12 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 			BrTaken = branch;
 			UncondBr = 1'b0;
 			ALUOp = 3'bx;
+            // ----
+            setFlag = 0;
 		end
 		
 		// CBZ
+        // CBZ Rd, Imm19: If (Reg[Rd] == 0) PC = PC + SignExtend(Imm19<<2). 
 		else begin // (instr[31:26] == 6'hB4) begin:
 			assert (instr[31:24] == 8'hB4);
 			Reg2Loc = 1'b0;
@@ -166,6 +173,8 @@ module control(instr, branch, Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, BrT
 			BrTaken = zeroFlag; // zero flag
 			UncondBr = 1'b0;
 			ALUOp = 3'b000;
+            // ----
+            setFlag = 0;
 		end
 	end
 	
