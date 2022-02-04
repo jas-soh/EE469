@@ -199,22 +199,25 @@ module control_testbench ();
         assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
 			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
 
-        instr = 32'b10010001000000000000010000000001; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X1, X0, #1      // X1 = 1
-        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
-			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
+		// SUBS
+		// SUBS Rd, Rn, Rm: Reg[Rd] = Reg[Rn] - Reg[Rm].  Set flags.
+        instr = 32'b11101011000000000000001111100001; branch = 1'bx; zeroFlag = 1'bx; #10; // SUBS X1, X31, X0     // X1 = -1
+		assert ((Reg2Loc == 1'b1) && (ALUSrc == 1'b0) && (MemToReg == 1'b0)	&& (RegWrite == 1'b1) 
+			&& (MemWrite == 1'b0)&& (BrTaken == 1'b0) 
+			&& (ALUOp == 3'b011) 
+			&& (setFlag == 1));
 
-        instr = 32'b10010001000000000000010000100010; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X2, X1, #1      // X2 = 2
-        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
-			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
+		// ADDS
+		// ADDS Rd, Rn, Rm: Reg[Rd] = Reg[Rn] + Reg[Rm]. Set flags.
+		instr = 32'b10101011000001000000000001100101; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDS X5, X3, X4      // X5 = -5
+		assert ((Reg2Loc == 1'b1) &&  (ALUSrc == 1'b0) && (MemToReg == 1'b0) && (RegWrite == 1'b1) && (MemWrite == 1'b0) && (BrTaken == 1'b0)
+			&& (ALUOp == 3'b100) && (setFlag == 1));
 
-        instr = 32'b10010001000000000000100000100011; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X3, X1, #2      // X3 = 3
-        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
-			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
-
-        instr = 32'b10010001000000000001000000000100; branch = 1'bx; zeroFlag = 1'bx; #10; // ADDI X4, X0, #4      // X4 = 4
-        assert ((ALUSrc == 1'b1) && (MemToReg == 1'b0) && (RegWrite == 1'b1)
-			&& (MemWrite == 1'b0) && (BrTaken == 1'b0) && (ALUOp == 3'b100) && (setFlag == 0));
-
+		// CBZ
+        // CBZ Rd, Imm19: If (Reg[Rd] == 0) PC = PC + SignExtend(Imm19<<2). 
+		instr = 32'b10110100000000000000001010011111; branch = 1'bx; zeroFlag = 1'b1; #10; // CBZ X31, FORWARD_CBZ // 3rd taken branch (+20)
+		assert ((Reg2Loc == 1'b0) && (ALUSrc == 1'b0) && (RegWrite == 1'b0)	&&	(MemWrite == 1'b0)
+			&& (BrTaken == 1'b1) && (UncondBr == 1'b0) &&	(ALUOp == 3'b000) && (setFlag == 0));
     end
 
 endmodule
