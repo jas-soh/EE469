@@ -1,8 +1,10 @@
-module program_counter (instr_addr, instruction, UncondBr, BrTaken);
-	input logic [63:0] instr_addr; // address of instruction
-	input logic [31:0] instruction;
+module program_counter ( instruction, UncondBr, BrTaken, clk);
+//	input logic [63:0] instr_addr; // address of instruction
+	output logic [31:0] instruction;
 	input logic UncondBr, BrTaken; // control inputs
+	input logic clk;
 	
+	logic [63:0] instr_addr;
 	
 	// calculating PC+4
 	logic [63:0] PC4;
@@ -27,20 +29,12 @@ module program_counter (instr_addr, instruction, UncondBr, BrTaken);
 	logic [63:0] nextPC;
 	mux2_1 BrTaken_mux (.s0(BrTaken), .a(PC4), .b(sum_PCandImm), .out(nextPC));
 	
+	instructmem instr (.address(instr_addr), .instruction, .clk);
 	
 endmodule
-
-module program_counter_testbench ();
-	logic [63:0] instr_addr; // address of instruction
-	logic [31:0] instruction;
-	logic UncondBr, BrTaken; // control inputs
-
-	program_counter dut (.*);
-
-	// initial begin
-		// instr_addr = {64{1'b1}}; instruction = ; UncondBr = 0; BrTaken = 0; #10;
-		// instr_addr = {64{1'b1}}; instruction = ; UncondBr = 0; BrTaken = 0; #10;
-		// instr_addr = {64{1'b1}}; instruction = ; UncondBr = 0; BrTaken = 0; #10;
-		// instr_addr = {64{1'b1}}; instruction = ; UncondBr = 0; BrTaken = 0; #10;
-	// end
-endmodule
+// EDITS MADE:
+// - removed instruction address as an input
+// - assumed that instruction address is not something that is used anywhese else,
+//   can keep it within the module
+// - added initialization of instructmem here. makes sense here and not in datapath
+// - changed instruction from input logic to output logic. driven by instructmem
