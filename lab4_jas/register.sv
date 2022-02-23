@@ -42,3 +42,16 @@ module D_FF64 (q, d, reset, clk);
 	  end
   endgenerate
 endmodule
+
+module D_FF_var #(SIZE=64) (q, d, reset, clk);
+  output [SIZE:0] q; 
+  input [SIZE:0] d;
+  input reset, clk; 
+ 
+  genvar i;
+  generate
+	  for (i = 0; i < SIZE; i++) begin : eachBit
+		D_FF flip_flop (.q(q[i]), .d(d[i]), .reset, .clk);
+	  end
+  endgenerate
+endmodule
