@@ -1,6 +1,6 @@
 //TODO
 module MEM (clk, reset, MemWrite, dataMem_in, mem_addr, writeBack, mem_read, memToReg);
-    input logic clk, reset, MemWrite, mem_read;
+    input logic clk, reset, MemWrite, mem_read, memToReg;
     input logic [63:0] dataMem_in, mem_addr;
 
     output logic [63:0] writeBack;

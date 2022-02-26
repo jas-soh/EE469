@@ -6,7 +6,7 @@ module EX(ALUSrc, ALUOp, immVal, dataA, dataB, ALUSum, negative, zero, overflow,
 
     output logic negative, zero, overflow, carry_out;
     output logic [63:0] ALUSum;
-    assign outB = dataB;
+    
     logic [63:0] ALU_inpt_B;
     // 2:1 mux for ALU input B select
 	wide_mux2_1 ALU_inpt (.s0(ALUSrc), .A(dataB), .B(immVal), .OUT(ALU_inpt_B));

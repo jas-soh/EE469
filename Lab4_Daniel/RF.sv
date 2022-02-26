@@ -39,20 +39,22 @@ Outputs:
 module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB, immVal,
 		forwardOpA, forwardOpB, writeEnable, ALUSrc, ALUOp, memWrite_E, MemToReg, regWrite_E,
 		sum_PCandImm, BrTaken, WriteRegister, Rd, mem_read, setFlag, shiftSel, shift_output, 
-		negative, overflow);
+		negative, overflow, readRegB);
 	input logic clk, writeEnable, negative, overflow;
 	input logic [31:0] instruction;
 	input logic [63:0] instr_addr, dataMem, ALUOut, writeData;
 	input logic [1:0] forwardOpA, forwardOpB;
 	input logic [4:0] WriteRegister;
 
-	output logic [4:0] Rd;
+	output logic [4:0] Rd, readRegB;
 	output logic [2:0] ALUOp; 
 	output logic ALUSrc, memWrite_E, MemToReg, regWrite_E, 
 				BrTaken, mem_read, setFlag, shiftSel;
 	output logic [63:0] readA, readB, sum_PCandImm, immVal, shift_output; 
 
 	logic [63:0] SE_condAddr19, SE_BrAddr26, addr, imm12_ZE, imm9_SE;
+	
+	assign Rd = instruction[4:0];
 	//---------------------------- update PC -----------------------
 	// sign extend condAddr19 and BrAddr26 then shift left by 2
 	logic carry_PCandImm;
@@ -70,15 +72,14 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	// ------------------------ register file -------------------------
 
 	// Register File - must be on negedge clk
-	logic [4:0] Ab_in;
-	wide_mux2_1 #(5) reg_input_Ab (.s0(Reg2Loc), .A(instruction[4:0]), .B(instruction[20:16]), .OUT(Ab_in));
+	wide_mux2_1 #(5) reg_input_Ab (.s0(Reg2Loc), .A(instruction[4:0]), .B(instruction[20:16]), .OUT(readRegB));
 
 	logic nClk;
 	not #50 inv (nClk, clk);
 	logic [63:0] Da_out, Db_out;
 	// Register File - must be on negedge clk
 	regfile regist (.ReadData1(Da_out), .ReadData2(Db_out), .WriteData(writeData), .ReadRegister1(instruction[9:5]),
-					 .ReadRegister2(Ab_in), .WriteRegister, .RegWrite(writeEnable), .clk(nClk));
+					 .ReadRegister2(readRegB), .WriteRegister, .RegWrite(writeEnable), .clk(nClk));
 	/* ------------------------ immediate values ------------------------ */
 	// sign extend imm12; zero extend imm9
 	assign imm12_ZE = {{52'd0}, {instruction[21:10]}};
@@ -126,14 +127,14 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 endmodule
 
 
-module RF_testbench()
+module RF_testbench();
 	logic clk, writeEnable, negative, overflow;
 	logic [31:0] instruction;
 	logic [63:0] instr_addr, dataMem, ALUOut, writeData;
 	logic [1:0] forwardOpA, forwardOpB;
 	logic [4:0] WriteRegister;
 
-	logic [4:0] Rd;
+	logic [4:0] Rd, readRegB;
 	logic [2:0] ALUOp; 
 	logic ALUSrc, memWrite_E, MemToReg, regWrite_E, 
 				BrTaken, mem_read, setFlag, shiftSel;
@@ -149,7 +150,7 @@ module RF_testbench()
 
 	initial begin
 		
-		$stop
+		$stop;
 	end
 
 endmodule

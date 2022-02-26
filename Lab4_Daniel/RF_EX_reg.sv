@@ -14,13 +14,13 @@ output logic ALUSrc_EX, memWrite_E_EX, MemToReg_EX, regWrite_E_EX,
 output logic [4:0] regWrite_EX;
 output logic [2:0] ALUOp_EX;
 
-register (#64) dataA_reg (.Din(dataA_RF), .Dout(dataA_EX), .enable(1'b1), .clk, .reset);
-register (#64) dataB_reg (.Din(dataB_RF), .Dout(dataB_EX), .enable(1'b1), .clk, .reset);
-register (#64) immVal_reg (.Din(immVal_RF), .Dout(immVal_EX), .enable(1'b1), .clk, .reset);
-register (#64) shift_output_reg (.Din(shift_output_RF), .Dout(shift_output_EX), .enable(1'b1), .clk, .reset);
+register #(64) dataA_reg (.Din(dataA_RF), .Dout(dataA_EX), .enable(1'b1), .clk, .reset);
+register #(64) dataB_reg (.Din(dataB_RF), .Dout(dataB_EX), .enable(1'b1), .clk, .reset);
+register #(64) immVal_reg (.Din(immVal_RF), .Dout(immVal_EX), .enable(1'b1), .clk, .reset);
+register #(64) shift_output_reg (.Din(shift_output_RF), .Dout(shift_output_EX), .enable(1'b1), .clk, .reset);
 
-register (#5) regWrite_reg (.Din(regWrite_RF), .Dout(regWrite_EX), .enable(1'b1), .clk, .reset);
-register (#3) ALUOp_reg (.Din(ALUOp_RF), .Dout(ALUOp_EX), .enable(1'b1), .clk, .reset);
+register #(5) regWrite_reg (.Din(regWrite_RF), .Dout(regWrite_EX), .enable(1'b1), .clk, .reset);
+register #(3) ALUOp_reg (.Din(ALUOp_RF), .Dout(ALUOp_EX), .enable(1'b1), .clk, .reset);
 
 D_FF ALUSrc_reg (.q(ALUSrc_EX), .d(ALUSrc_RF), .reset, .clk);
 D_FF memWrite_E_reg (.q(memWrite_E_EX), .d(memWrite_E_RF), .reset, .clk);

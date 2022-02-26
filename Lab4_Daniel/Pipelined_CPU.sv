@@ -5,7 +5,6 @@ module Pipelined_CPU(reset, clk);
 	logic BrTaken;
 	logic negative, zero, overflow, carry_out;
 	logic [3:0] Flags;
-	logic [63:0] ALUOut;
 
 	/*------------------------------------------- Stage 1 - IF -----------------------------------*/ 
 
@@ -22,16 +21,17 @@ module Pipelined_CPU(reset, clk);
 	logic [63:0] dataA_RF, dataB_RF, immVal_RF, shift_output_RF, dataA_EX, dataB_EX, immVal_EX, shift_output_EX;
 	logic ALUSrc_RF, memWrite_E_RF, MemToReg_RF, regWrite_E_RF,mem_read_RF, setFlag_RF, shiftSel_RF, ALUSrc_EX, 
 		memWrite_E_EX, MemToReg_EX, regWrite_E_EX, mem_read_EX, setFlag_EX, shiftSel_EX;
-	logic [4:0] regWrite_RF, regWrite_EX;
+	logic [4:0] regWrite_RF, regWrite_EX, readRegB;
 	logic [2:0] ALUOp_RF, ALUOp_EX;
 
+	logic [63:0] ALU_out_EX, ALU_out_MEM, shift_output_MEM;
 	// Initialize Register/dec stage  - several connections need to be made dataMem, 
-	RF s2 (.clk, .instruction(instruction_RF), .instr_addr(instr_addr_RF), .dataMem(writeBack_mem), .ALUOut,
-		.writeData(data_write), .readA(dataA_RF), .readB(dataB_RF), .immVal(immVal_RF), .forwardOpA(TODO), .forwardOpB(TODO),
-		.writeEnable(regWrite_E_WB), .ALUSrc(ALUSrc_RF), .ALUOp(ALUOp_RF), .memWrite_E(memWrite_E_RF), .Mem2Reg(MemToReg_RF),
+	RF s2 (.clk, .instruction(instruction_RF), .instr_addr(instr_addr_RF), .dataMem(writeBack_mem), .ALUOut(ALU_out_EX),
+		.writeData(data_write), .readA(dataA_RF), .readB(dataB_RF), .immVal(immVal_RF), .forwardOpA(fOp_A), .forwardOpB(fOp_B),
+		.writeEnable(regWrite_E_WB), .ALUSrc(ALUSrc_RF), .ALUOp(ALUOp_RF), .memWrite_E(memWrite_E_RF), .MemToReg(MemToReg_RF),
 		.regWrite_E(regWrite_E_RF), .sum_PCandImm(branch_sum), .BrTaken, .WriteRegister(regWrite_WB), .Rd(regWrite_RF),
 		.mem_read(mem_read_RF), .setFlag(setFlag_RF), .shiftSel(shiftSel_RF), .shift_output(shift_output_RF),
-		.negative(Flags[0]), .overflow(Flags[2]));
+		.negative(Flags[0]), .overflow(Flags[2]), .readRegB);
 	
 	RF_EX_reg reg2 (.clk, .reset, .dataA_RF, .dataB_RF, .immVal_RF, .shift_output_RF, .ALUSrc_RF, .memWrite_E_RF, .MemToReg_RF, .regWrite_E_RF,
             .mem_read_RF, .setFlag_RF, .shiftSel_RF, .regWrite_RF, .ALUOp_RF, .dataA_EX, .dataB_EX, .immVal_EX, .shift_output_EX,
@@ -40,7 +40,6 @@ module Pipelined_CPU(reset, clk);
 	/*----------------------------------------- Stage 3 - EX ------------------------------------------*/
 	
     logic memWrite_E_MEM, MemToReg_MEM, regWrite_E_MEM, mem_read_MEM, shiftSel_MEM;
-	logic [63:0] ALU_out_EX, ALU_out_MEM, shift_output_MEM;
     logic [4:0] regWrite_MEM;
     logic [63:0] mem_Din_MEM;
 
@@ -55,25 +54,26 @@ module Pipelined_CPU(reset, clk);
 	
 	/*------------------------------------- Stage 4 - MEM -------------------------------------------*/
 	logic [63:0] writeBack_mem, WriteData_WB, shift_output_WB;
-	logic regWrite_WB, shiftsel_WB, regWrite_E_WB;
+	logic [4:0] regWrite_WB;
+	logic shiftsel_WB, regWrite_E_WB;
 
 	MEM s4 (.clk, .reset, .MemWrite(memWrite_E_MEM), .dataMem_in(mem_Din_MEM), .mem_addr(ALU_out_MEM),
-			.writeBack(writeBack_mem), .mem_read(mem_read_MEM), .memToReg(MemToReg_MEMv));
+			.writeBack(writeBack_mem), .mem_read(mem_read_MEM), .memToReg(MemToReg_MEM));
 
-	MEM_WB_reg  reg4 (.clk, .reset, .regWrite_E_MEM, .WriteData_MEM(writeBack), .regWrite_MEM, .shiftsel_MEM, 
-			shift_output_MEM, .regWrite_E_WB, .WriteData_WB, regWrite_WB, shiftsel_WB, shift_output_WB); 
+	MEM_WB_reg  reg4 (.clk, .reset, .regWrite_E_MEM, .WriteData_MEM(writeBack_mem), .regWrite_MEM, .shiftSel_MEM, 
+			.shift_output_MEM, .regWrite_E_WB, .WriteData_WB, .regWrite_WB, .shiftsel_WB, .shift_output_WB); 
 	
 	/*------------------------------------ Stage 5 - WB --------------------------------------------*/
 	logic [63:0] data_write;
 	WB s5 (.mem_alu_out(WriteData_WB), .shift_output(shift_output_WB), .shift_sel(shiftsel_WB), .data_write);
 
-
-	// Initialize forwarding unit - TODO 
-
+	logic [1:0] fOp_A, fOp_B;
+	/*------------------------------------ forwarding unit -----------------------------------------*/
+	forwarding_unit forwardUnit (.addr_A(instruction_RF[9:5]), .addr_B(readRegB), .write_reg_mem(regWrite_MEM),
+	.regWrite_E_mem(regWrite_E_MEM), .write_reg_alu(regWrite_EX), .regWrite_E_alu(regWrite_E_EX), .forwardOp_A(fOp_A), .forwardOp_B(fOp_B));
 	// set flags 
 	updateFlags flagSe (.setFlag(setFlag_EX), .Flags, .negative, .zero, .overflow, .carryOut(carry_out), .reset, .clk);
 endmodule
-
 
 `timescale 1ps/1ps
 module Pipelined_CPU_testbench();
