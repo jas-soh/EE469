@@ -1,4 +1,4 @@
-// todo, create pipelined cpu
+// 5 stage pipelined CPU
 module Pipelined_CPU(reset, clk);
 	input logic clk, reset;
 
@@ -24,8 +24,8 @@ module Pipelined_CPU(reset, clk);
 	logic [4:0] regWrite_RF, regWrite_EX, readRegB, regWrite_WB;
 	logic [2:0] ALUOp_RF, ALUOp_EX;
 
-	logic [63:0] ALU_out_EX, ALU_out_MEM, shift_output_MEM;
-	logic [63:0] writeBack_mem, WriteData_WB, shift_output_WB, data_write;
+	logic [63:0] ALU_out_EX, ALU_out_MEM;
+	logic [63:0] writeBack_mem, WriteData_WB;
 	logic [6:0] instr_31_to_25_EX, instr_31_to_25_RF;
 	logic [1:0] fOp_A, fOp_B;
 	// Initialize Register/dec stage  - several connections need to be made dataMem, 
@@ -42,7 +42,7 @@ module Pipelined_CPU(reset, clk);
 
 	/*----------------------------------------- Stage 3 - EX ------------------------------------------*/
 	
-    logic memWrite_E_MEM, MemToReg_MEM, regWrite_E_MEM, mem_read_MEM, shiftSel_MEM;
+    logic memWrite_E_MEM, MemToReg_MEM, regWrite_E_MEM, mem_read_MEM;
     logic [4:0] regWrite_MEM;
     logic [63:0] mem_Din_MEM;
 
@@ -52,20 +52,19 @@ module Pipelined_CPU(reset, clk);
 		.negative, .zero, .overflow, .carry_out, .shiftSel(shiftSel_EX), .shift_result(shift_output_EX));
 
 	EX_MEM_reg  reg3 (.clk, .reset, .memWrite_E_EX, .MemToReg_EX, .regWrite_E_EX, .mem_read_EX, .ALU_out_EX, 
-			.regWrite_EX, .mem_Din_EX(dataB_EX), .shift_output_EX, .shiftSel_EX, .memWrite_E_MEM, .MemToReg_MEM, 
-			.regWrite_E_MEM, .mem_read_MEM, .ALU_out_MEM, .regWrite_MEM, .mem_Din_MEM, .shift_output_MEM, .shiftSel_MEM);
+			.regWrite_EX, .mem_Din_EX(dataB_EX), .memWrite_E_MEM, .MemToReg_MEM, .regWrite_E_MEM, .mem_read_MEM,
+			.ALU_out_MEM, .regWrite_MEM, .mem_Din_MEM);
 	
 	/*------------------------------------- Stage 4 - MEM -------------------------------------------*/
-	logic shiftsel_WB;
 
 	MEM s4 (.clk, .reset, .MemWrite(memWrite_E_MEM), .dataMem_in(mem_Din_MEM), .mem_addr(ALU_out_MEM),
 			.writeBack(writeBack_mem), .mem_read(mem_read_MEM), .memToReg(MemToReg_MEM));
 
-	MEM_WB_reg  reg4 (.clk, .reset, .regWrite_E_MEM, .WriteData_MEM(writeBack_mem), .regWrite_MEM, .shiftSel_MEM, 
-			.shift_output_MEM, .regWrite_E_WB, .WriteData_WB, .regWrite_WB, .shiftsel_WB, .shift_output_WB); 
+	MEM_WB_reg  reg4 (.clk, .reset, .regWrite_E_MEM, .WriteData_MEM(writeBack_mem), .regWrite_MEM, 
+			.regWrite_E_WB, .WriteData_WB, .regWrite_WB); 
 	
 	/*------------------------------------ Stage 5 - WB --------------------------------------------*/
-	WB s5 (.mem_alu_out(WriteData_WB), .shift_output(shift_output_WB), .shift_sel(shiftsel_WB), .data_write);
+	// used output of MEM_WB register as write data inputs to EX stage
 
 	/*------------------------------------ forwarding unit -----------------------------------------*/
 	forwarding_unit forwardUnit (.addr_A(instruction_RF[9:5]), .addr_B(readRegB), .write_reg_mem(regWrite_MEM),

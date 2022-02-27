@@ -1,5 +1,4 @@
-/*  shifts 64 bit value to the left by two. fills in the two LSB's with zeros 
-    NOTE: Has not been tested. 
+/*  shifts 64 bit value to the left by two. fills in the two LSB's with zeros  
 */
 module shift2Left (in, out);
     input logic [63:0] in;

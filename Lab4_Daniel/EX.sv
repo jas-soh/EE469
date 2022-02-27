@@ -1,4 +1,4 @@
-// TODO EXECUTE stage of the 5 stage pipeline
+// EXECUTE stage of the 5 stage pipeline
 module EX(ALUSrc, ALUOp, immVal, dataA, dataB, execute_output, negative, zero, overflow, carry_out, shiftSel, shift_result);
     input logic ALUSrc, shiftSel;
     input logic [2:0] ALUOp;

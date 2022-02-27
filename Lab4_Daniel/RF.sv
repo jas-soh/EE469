@@ -1,13 +1,10 @@
-/* TODO - REG/DEC stage
+/*  REG/DEC stage
 	In this stage we are:
 	- initializing the registerfile and outputing Da and Db
 	- sign estended immediate values that may go into ALU
 	- computing the branch value and sending that back to IF
 	- main control unit here, outputting control signals
 	
-	NOTE:
-		there is only one regfile in the pipelined CPU but there 
-		are two stages that interact with it. The write back needs to be input to this
 Inputs:
 - clk
 - instruction: current instruction
@@ -54,7 +51,7 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	logic [63:0] SE_condAddr19, SE_BrAddr26, addr, imm12_ZE, imm9_SE;
 	
 	assign Rd = instruction[4:0];
-	//---------------------------- update PC -----------------------
+	/*---------------------------- update PC -------------------------*/
 	// sign extend condAddr19 and BrAddr26 then shift left by 2
 	logic carry_PCandImm;
 	
@@ -68,7 +65,7 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	// adder with parameter WIDTH
 	add_width PCandImm (.A(addr), .B(instr_addr), .cIn(1'b0), .s(sum_PCandImm), .cOut(carry_PCandImm));
 
-	// ------------------------ register file -------------------------
+	/* ------------------------ register file -------------------------*/
 
 	// Register File - must be on negedge clk
 	wide_mux2_1 #(5) reg_input_Ab (.s0(Reg2Loc), .A(instruction[4:0]), .B(instruction[20:16]), .OUT(readRegB));
@@ -117,15 +114,18 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	/*---------------------- shifter -----------------------------------------*/
 	// implement shifter
 	shifter shif (.value(readA), .direction(1'b1), .distance(instruction[15:10]), .result(shift_output));
-	// --------------------- control - TODO ----------------------------------
+	/* --------------------- control - ---------------------------------------*/
 	// make sure output control signals match with RF. need it to also be output of this module
 	// 
 	logic controlNeg, controlOverflow;
+	// forwarding alu flags
 	mux2_1 forwardmuxNeg (.s0(forwardOpflags), .a(negative), .b(forwardNeg), .out(controlNeg));
 	mux2_1 forwardmuxOver (.s0(forwardOpflags), .a(overflow), .b(forwardOver), .out(controlOverflow));
+
 	control cntl (.instr(instruction), .mem_read, .zeroFlag, .Reg2Loc, .ALUSrc, .MemToReg, 
 					.RegWrite(regWrite_E), .MemWrite(memWrite_E), .BrTaken, .UncondBr, .ALUOp, .setFlag, 
 					.immSize, .shiftSel, .negative(controlNeg), .overflow(controlOverflow));
+					
 endmodule
 
 
