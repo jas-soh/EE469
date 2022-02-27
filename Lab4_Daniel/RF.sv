@@ -39,8 +39,8 @@ Outputs:
 module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB, immVal,
 		forwardOpA, forwardOpB, writeEnable, ALUSrc, ALUOp, memWrite_E, MemToReg, regWrite_E,
 		sum_PCandImm, BrTaken, WriteRegister, Rd, mem_read, setFlag, shiftSel, shift_output, 
-		negative, overflow, readRegB);
-	input logic clk, writeEnable, negative, overflow;
+		negative, overflow, readRegB, forwardNeg, forwardOver, forwardOpflags);
+	input logic clk, writeEnable, negative, overflow, forwardNeg, forwardOver, forwardOpflags;
 	input logic [31:0] instruction;
 	input logic [63:0] instr_addr, dataMem, ALUOut, writeData;
 	input logic [1:0] forwardOpA, forwardOpB;
@@ -51,7 +51,6 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	output logic ALUSrc, memWrite_E, MemToReg, regWrite_E, 
 				BrTaken, mem_read, setFlag, shiftSel;
 	output logic [63:0] readA, readB, sum_PCandImm, immVal, shift_output; 
-
 	logic [63:0] SE_condAddr19, SE_BrAddr26, addr, imm12_ZE, imm9_SE;
 	
 	assign Rd = instruction[4:0];
@@ -102,7 +101,7 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	generate
 		for (i = 0; i < 16; i++) begin : nor_gates
 			// hold whether 4 consecutive bits are zero
-			nor #50 zer (nors[i], Db_out[i*4], Db_out[i*4+1], Db_out[i*4+2], Db_out[i*4+3]);
+			nor #50 zer (nors[i], readB[i*4], readB[i*4+1], readB[i*4+2], readB[i*4+3]);
 		end
 	endgenerate
 	
@@ -113,17 +112,20 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 		end
 	endgenerate
 	
-	// ZERO check
+	// ZERO check - not doing right thing
 	and #50 out (zeroFlag, ands[0], ands[1], ands[2], ands[3]);
 	/*---------------------- shifter -----------------------------------------*/
 	// implement shifter
-	shifter shif (.value(Da_out), .direction(1'b1), .distance(instruction[15:10]), .result(shift_output));
+	shifter shif (.value(readA), .direction(1'b1), .distance(instruction[15:10]), .result(shift_output));
 	// --------------------- control - TODO ----------------------------------
 	// make sure output control signals match with RF. need it to also be output of this module
 	// 
+	logic controlNeg, controlOverflow;
+	mux2_1 forwardmuxNeg (.s0(forwardOpflags), .a(negative), .b(forwardNeg), .out(controlNeg));
+	mux2_1 forwardmuxOver (.s0(forwardOpflags), .a(overflow), .b(forwardOver), .out(controlOverflow));
 	control cntl (.instr(instruction), .mem_read, .zeroFlag, .Reg2Loc, .ALUSrc, .MemToReg, 
 					.RegWrite(regWrite_E), .MemWrite(memWrite_E), .BrTaken, .UncondBr, .ALUOp, .setFlag, 
-					.immSize, .shiftSel, .negative, .overflow);
+					.immSize, .shiftSel, .negative(controlNeg), .overflow(controlOverflow));
 endmodule
 
 

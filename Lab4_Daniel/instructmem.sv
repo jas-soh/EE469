@@ -3,15 +3,15 @@
 // two words of the address must be 0).
 //
 // To change the file that is loaded, edit the filename here:
-`define BENCHMARK "../benchmarks/test01_AddiB.arm"
-//`define BENCHMARK "../benchmarks/test02_AddsSubs.arm"
-//`define BENCHMARK "../benchmarks/test03_CbzB.arm"
-//`define BENCHMARK "../benchmarks/test04_LdurStur.arm"
-//`define BENCHMARK "../benchmarks/test05_Blt.arm"
-//`define BENCHMARK "../benchmarks/test06_AndEorLsr.arm"
-//`define BENCHMARK "../benchmarks/test10_forwarding.arm"
-//`define BENCHMARK "../benchmarks/test11_Sort.arm"
-//`define BENCHMARK "../benchmarks/test12_CRC16.arm"
+// `define BENCHMARK "../benchmarks/test01_AddiB.arm"
+// `define BENCHMARK "../benchmarks/test02_AddsSubs.arm"
+// `define BENCHMARK "../benchmarks/test03_CbzB.arm"
+// `define BENCHMARK "../benchmarks/test04_LdurStur.arm"
+// `define BENCHMARK "../benchmarks/test05_Blt.arm"
+// `define BENCHMARK "../benchmarks/test06_AndEorLsr.arm"
+// `define BENCHMARK "../benchmarks/test10_forwarding.arm"
+// `define BENCHMARK "../benchmarks/test11_Sort.arm"
+`define BENCHMARK "../benchmarks/test12_CRC16.arm"
 `timescale 1ns/10ps
 
 // How many bytes are in our memory?  Must be a power of two.
@@ -59,7 +59,7 @@ endmodule
 
 module instructmem_testbench ();
 
-	parameter ClockDelay = 10000;
+	parameter ClockDelay = 15000;
 
 	logic		[63:0]	address;
 	logic					clk;

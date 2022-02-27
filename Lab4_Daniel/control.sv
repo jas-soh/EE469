@@ -110,7 +110,7 @@ module control(instr, mem_read, zeroFlag, Reg2Loc, ALUSrc, MemToReg,
 		else if (instr[31:21] == 11'h69A) begin
 			Reg2Loc = 1'bx;
 			ALUSrc = 1'bx;
-			MemToReg = 1'bx;
+			MemToReg = 1'b0;
 			RegWrite = 1'b1;
 			MemWrite = 1'b0;
 			BrTaken = 1'b0;

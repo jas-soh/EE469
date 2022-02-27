@@ -1,4 +1,9 @@
 
+// register that holds flags coming from ALU, 
+// flags[0] - negative
+// flags[1] - zero
+// flags[2] - overflow
+// flags[3] - carryout
 module updateFlags(setFlag, Flags, negative, zero, overflow, carryOut, reset, clk);
 	input logic setFlag, negative, zero, overflow, carryOut,
 					reset, clk;
