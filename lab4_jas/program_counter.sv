@@ -16,7 +16,7 @@ module program_counter (instruction, instr_addr, UncondBr, BrTaken, clk, reset);
 	
 	// calculating PC+4
 	logic [63:0] PC4;
-	assign PC4 = instr_addr + 4;
+	assign PC4 = instr_addr + 4; // fix
 	
 	
 	// sign extend condAddr19 and BrAddr26 then shift left by 2

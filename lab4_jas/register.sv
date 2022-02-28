@@ -44,8 +44,8 @@ module D_FF64 (q, d, reset, clk);
 endmodule
 
 module D_FF_var #(SIZE=64) (q, d, reset, clk);
-  output [SIZE:0] q; 
-  input [SIZE:0] d;
+  output [SIZE-1:0] q; 
+  input [SIZE-1:0] d;
   input reset, clk; 
  
   genvar i;

@@ -227,7 +227,7 @@ module control(instr, branch, ALUzeroFlag, Reg2Loc, ALUSrc, MemToReg, RegWrite, 
 			MemToReg = 1'bx;
 			RegWrite = 1'b0;
 			MemWrite = 1'b0;
-			BrTaken = 1'bx;
+			BrTaken = 1'b0;
 			UncondBr = 1'bx;
 			ALUOp = 3'bxxx;
             // ----

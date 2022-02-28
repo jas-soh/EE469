@@ -17,6 +17,23 @@ module mux2_1 (s0, a, b, out);
 	
 endmodule
 
+// 3:1 Mux
+`timescale 1ps/1ps
+module mux3_1 (s0, a, b, c, out);
+
+	input logic a, b, c;
+	input logic [1:0] s0;
+	output logic out;
+	
+	logic temp;
+    logic [1:0] not_s0;
+
+    // 0 chooses A, 1 chooses B, 2 chooses c
+    mux2_1 mux1 (.s0(s0[0]), .a, .b, .out(temp));
+	mux2_1 mux2 (.s0(s0[1]), .a(temp), .b(c), .out);
+	
+endmodule
+
 module mux2_1_multi #(parameter SIZE = 64) (s0, a, b, out);
 	input logic [SIZE-1:0] a, b;
 	input logic s0;
@@ -26,6 +43,20 @@ module mux2_1_multi #(parameter SIZE = 64) (s0, a, b, out);
 	generate
 		for (i = 0; i < SIZE; i++) begin : eachBit
 			mux2_1 mux_multi (.s0, .a(a[i]), .b(b[i]), .out(out[i]));
+		end
+	endgenerate
+
+endmodule
+
+module mux3_1_multi #(parameter SIZE = 64) (s0, a, b, c, out);
+	input logic [SIZE-1:0] a, b, c;
+	input logic [1:0] s0;
+	output logic [SIZE-1:0] out;
+
+	genvar i;
+	generate
+		for (i = 0; i < SIZE; i++) begin : eachBit
+			mux3_1 mux_multi (.s0, .a(a[i]), .b(b[i]), .c(c[i]), .out(out[i]));
 		end
 	endgenerate
 

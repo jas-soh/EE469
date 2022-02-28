@@ -5,13 +5,13 @@
 // To change the file that is loaded, edit the filename here:
 //`define BENCHMARK "../benchmarks/test01_AddiB.arm"
 //`define BENCHMARK "../benchmarks/test02_AddsSubs.arm"
-//`define BENCHMARK "../benchmarks/test03_CbzB.arm"
+`define BENCHMARK "../benchmarks/test03_CbzB.arm"
 //`define BENCHMARK "../benchmarks/test04_LdurStur.arm"
 //`define BENCHMARK "../benchmarks/test05_Blt.arm"
 //`define BENCHMARK "../benchmarks/test06_AndEorLsr.arm"
 //`define BENCHMARK "../benchmarks/test10_forwarding.arm"
 //`define BENCHMARK "../benchmarks/test11_Sort.arm"
-`define BENCHMARK "../benchmarks/test12_CRC16.arm"
+//`define BENCHMARK "../benchmarks/test12_CRC16.arm"
 
 
 `timescale 1ns/10ps
@@ -55,7 +55,7 @@ module instructmem (
 			instruction = 'x;
 		else
 			instruction = mem[address/4];
-		//$display("instruction: = %0b", instruction);
+		$display("instruction: = %0b", instruction);
 	end
 		
 endmodule
