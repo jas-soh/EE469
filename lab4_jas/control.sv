@@ -201,7 +201,8 @@ module control(instr, ALUzeroFlag, negative, overflow, Reg2Loc, ALUSrc, MemToReg
 
 		// B.LT
         // B.LT Imm19: If (flags.negative != flags.overflow) PC = PC + SignExtend(Imm19<<2). 
-		else if ((instr[31:24] == 8'h54) && (instr[4:0] == 5'h0B) && negative != overflow) begin
+		//else if ((instr[31:24] == 8'h54) && (instr[4:0] == 5'h0B) && negative != overflow) begin
+		else if ((instr[31:24] == 8'h54) && (negative != overflow)) begin
 			Reg2Loc = 1'bx;
 			ALUSrc = 1'bx;
 			MemToReg = 1'bx;

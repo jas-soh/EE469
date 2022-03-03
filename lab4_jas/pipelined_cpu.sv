@@ -193,7 +193,7 @@ module pipelined_cpu_testbench ();
 
     initial begin
         reset <= 1; @(posedge clk);
-        reset <= 0; repeat(50) @(posedge clk);
+        reset <= 0; repeat(1500) @(posedge clk);
         $stop;
     end
 endmodule

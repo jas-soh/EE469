@@ -38,8 +38,12 @@ module ID (clk, reset, instr_ID, instr_addr_ID, ALUzeroFlag, ovFlag, negFlag, Wr
 
     // sign extend condAddr19 and BrAddr26 then shift left by 2
 	logic [63:0] SE_condAddr19, SE_BrAddr26;
-	assign SE_BrAddr26 = {{38{instr_ID[25]}}, instr_ID[25:0]} << 2; // todo shifter
-	assign SE_condAddr19 = {{45{instr_ID[23]}}, instr_ID[23:5]} << 2;
+	//assign SE_BrAddr26 = {{38{instr_ID[25]}}, instr_ID[25:0]} << 2; // todo shifter
+	//assign SE_condAddr19 = {{45{instr_ID[23]}}, instr_ID[23:5]} << 2;
+
+    shift2Left shift1 (.in({{38{instr_ID[25]}}, instr_ID[25:0]}), .out(SE_BrAddr26));
+    shift2Left shift2 (.in({{45{instr_ID[23]}}, instr_ID[23:5]}), .out(SE_condAddr19));
+
 
     // 2:1 Mux to choose condAddr or BrAddr based on UncondBr control signal
 	logic [63:0] addr;
@@ -61,7 +65,7 @@ module ID (clk, reset, instr_ID, instr_addr_ID, ALUzeroFlag, ovFlag, negFlag, Wr
     // Register
     logic [4:0] Rd, Rm;
     //logic [63:0] Dw;
-    logic [63:0] Da, Db;
+    logic [63:0] Da, Db, Da_fwd, Db_fwd;
     //logic [4:0] Reg2Loc_out;
     assign Rd = instr_ID[4:0];
     assign Rn = instr_ID[9:5];
@@ -71,15 +75,24 @@ module ID (clk, reset, instr_ID, instr_addr_ID, ALUzeroFlag, ovFlag, negFlag, Wr
         .ReadRegister1(Rn), .ReadRegister2(Reg2Loc_out), .WriteRegister(WriteRegister_WB), .RegWrite(RegWrite_WB), .clk(~clk)); // todo not clk
 
     // forwarding data
-    mux3_1_multi #(64) muxA (.s0(forwardA), .a(Da), .b(WriteData_MEM), .c(WriteData_EX), .out(Da_ID));
-    mux3_1_multi #(64) muxB (.s0(forwardB), .a(Db), .b(WriteData_MEM), .c(WriteData_EX), .out(Db_ID));
+    mux3_1_multi #(64) muxA (.s0(forwardA), .a(Da), .b(WriteData_MEM), .c(WriteData_EX), .out(Da_fwd));
+    mux3_1_multi #(64) muxB (.s0(forwardB), .a(Db), .b(WriteData_MEM), .c(WriteData_EX), .out(Db_fwd));
 
     // forwarding flags
     mux2_1 mux_neg (.s0(accel_lt), .a(negFlag), .b(ALU_neg), .out(cntrl_neg));
     mux2_1 mux_ov (.s0(accel_lt), .a(ovFlag), .b(ALU_ov), .out(cntrl_ov));
 
     assign WriteRegister_ID = Rd;
+
+    // shift amount LSR
+    logic [63:0] shift_out;
+    shifter shift (.value(Da_fwd), .direction(1'b1), .distance(instr_ID[15:10]), .result(shift_out));
+
+    // choose shiftamount of mem for writing data to register
+    mux2_1_multi #(64) shiftSel_muxA (.s0(shiftSel), .a(Da_fwd), .b(shift_out), .out(Da_ID));
+    mux2_1_multi #(64) shiftSel_muxB (.s0(shiftSel), .a(Db_fwd), .b('0), .out(Db_ID));
     
+
 
 endmodule
 

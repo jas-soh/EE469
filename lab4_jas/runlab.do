@@ -39,6 +39,7 @@ vlog "./MEM.sv"
 vlog "./MEM_WB_reg.sv"
 vlog "./forwarding_unit.sv"
 vlog "./accel_br.sv"
+vlog "./shift2Left.sv"
 
 
 

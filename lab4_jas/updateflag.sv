@@ -61,7 +61,7 @@ module updateFlag(clk, reset, setFlag, negative, zero, overflow, carryOut, negFl
 	mux2_1 selectorCOut (.s0(setFlag), .a(Flags[3]), .b(carryOut), .out(cOutSel));
 	D_FF cOu (.q(Flags[3]), .d(cOutSel), .reset, .clk);
 
-    assign negflag = Flags[0];
+    assign negFlag = Flags[0];
     assign zeroFlag = Flags[1];
     assign ovFlag = Flags[2];
     assign carryFlag = Flags[3];
