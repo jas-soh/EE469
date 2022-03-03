@@ -15,12 +15,12 @@ module forwarding_unit (Aa, Ab, RegWrite_MEM, WriteRegister_MEM, RegWrite_EX, Wr
     output logic [1:0] forwardB; 
 
     always_comb begin
-        if (RegWrite_EX && (Aa == WriteRegister_EX)) forwardA = 2'b10; 
-        else if (RegWrite_MEM && (Aa == WriteRegister_MEM)) forwardA = 2'b01;
+        if ((Aa != 5'b11111) && RegWrite_EX && (Aa == WriteRegister_EX)) forwardA = 2'b10; 
+        else if ((Aa != 5'b11111) && RegWrite_MEM && (Aa == WriteRegister_MEM)) forwardA = 2'b01;
         else forwardA = 2'b0;
         
-        if (RegWrite_EX && (Ab == WriteRegister_EX)) forwardB = 2'b10; 
-        else if (RegWrite_MEM && (Ab == WriteRegister_MEM)) forwardB = 2'b01;
+        if ((Ab != 5'b11111) && RegWrite_EX && (Ab == WriteRegister_EX)) forwardB = 2'b10; 
+        else if ((Ab != 5'b11111) && RegWrite_MEM && (Ab == WriteRegister_MEM)) forwardB = 2'b01;
         else forwardB = 2'b0;
     end
 

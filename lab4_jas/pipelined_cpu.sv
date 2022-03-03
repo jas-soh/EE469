@@ -8,20 +8,22 @@ module pipelined_cpu (reset, clk);
     logic [63:0] instr_addr_ID;
     logic ALUSrc_ID, MemToReg_ID, RegWrite_ID, MemWrite_ID, BrTaken_ID; // control signals
     logic [2:0] ALUOp_ID;
-    logic read_enable_ID, setFlag;
+    logic read_enable_ID, setFlag_ID;
     logic [63:0] ImmSize_out_ID;
     logic [63:0] Da_ID, Db_ID;
     logic [4:0] WriteRegister_ID;
     logic [63:0] branchVal;
-    logic branch;
+    //logic branch;
+    logic cntrl_ov, cntrl_neg;
     logic [4:0] Aa, Ab;
     logic ALUSrc_EX, MemToReg_EX, RegWrite_EX, MemWrite_EX;
+    logic [31:0] instr_EX;
     logic [2:0] ALUOp_EX;
     logic [63:0] ImmSize_out_EX;
     logic [63:0] Da_EX, Db_EX;
     logic [63:0] ALU_out_EX;
-    logic read_enable_EX;
-    logic ALUzeroFlag, negFlag, ovFlag;
+    logic read_enable_EX, setFlag_EX;
+    logic ALUzeroFlag, negFlag, ovFlag, carryFlag, zeroFlag;
     logic [63:0] Din_EX;
     logic [4:0] WriteRegister_EX;
     logic MemWrite_MEM;
@@ -38,7 +40,8 @@ module pipelined_cpu (reset, clk);
     logic [63:0] WriteData_WB;
     logic [4:0] WriteRegister_WB;
     logic [1:0] forwardA, forwardB;
-    logic accel_zero;
+    logic accel_zero, accel_lt;
+    logic ALU_ov, ALU_cout, ALU_neg;
 
     // ---------- Instruction fetch ----------
     // input logic clk, reset;
@@ -48,7 +51,7 @@ module pipelined_cpu (reset, clk);
     // output logic [31:0] instr;
     // logic [63:0] instr_addr;
     // logic [31:0] instr;
-    IF instruction_fetch (.clk, .reset, .instr_addr, .instr, .branchVal, .BrTaken(BrTaken_ID), .accel_zero);
+    IF instruction_fetch (.clk, .reset, .instr_addr, .instr, .branchVal, .BrTaken(BrTaken_ID));
 
     // ---------- IF to ID reg ----------
     // input logic clk, reset;
@@ -80,16 +83,16 @@ module pipelined_cpu (reset, clk);
     // logic [63:0] Da_ID, Db_ID;
     // logic [63:0] branchVal;
     // logic [4:0] Aa, Ab;
-    ID instruction_decode (.clk, .reset, .instr_ID, .instr_addr_ID, .branch, .ALUzeroFlag, .WriteRegister_WB, .RegWrite_WB, .WriteData_WB,
-        .ALUSrc_ID, .MemToReg_ID, .RegWrite_ID, .MemWrite_ID, .BrTaken_ID, .ALUOp_ID, .read_enable_ID, .setFlag,
+    ID instruction_decode (.clk, .reset, .instr_ID, .instr_addr_ID, .ovFlag, .negFlag, .ALUzeroFlag, .ALU_neg, .ALU_ov, .WriteRegister_WB, .RegWrite_WB, .WriteData_WB,
+        .ALUSrc_ID, .MemToReg_ID, .RegWrite_ID, .MemWrite_ID, .BrTaken_ID, .ALUOp_ID, .read_enable_ID, .setFlag_ID,
         .ImmSize_out_ID, .Da_ID, .Db_ID, .branchVal, .Rn(Aa), .Reg2Loc_out(Ab), .WriteRegister_ID,
-        .WriteData_EX(ALU_out_EX), .WriteData_MEM, .forwardA, .forwardB);
+        .WriteData_EX(ALU_out_EX), .WriteData_MEM, .forwardA, .forwardB, .accel_zero, .accel_lt);
 
     // forwarding unit
     forwarding_unit fwd (.Aa, .Ab, .RegWrite_MEM, .WriteRegister_MEM, .RegWrite_EX, .WriteRegister_EX, .forwardA, .forwardB);
 
     // accelerated branching
-    accel_br accelerate (.instr_ID, .Db_ID, .WriteRegister_ID, .accel_zero);
+    accel_br accelerate (.instr_ID, .setFlag_EX, .Db_ID, .accel_zero, .accel_lt);
 
     // ---------- ID to EX reg ---------
     // input logic clk, reset;
@@ -104,8 +107,8 @@ module pipelined_cpu (reset, clk);
     // logic [2:0] ALUOp_EX;
     // logic ImmSize_out_EX;
     // logic [63:0] Da_EX, Db_EX;
-    ID_EX_reg pipelining_ID_EX (.clk, .reset, .ALUSrc_ID, .MemToReg_ID, .RegWrite_ID, .MemWrite_ID, .ALUOp_ID, .ImmSize_out_ID, .Da_ID, .Db_ID, .read_enable_ID, .WriteRegister_ID,
-        .ALUSrc_EX, .MemToReg_EX, .RegWrite_EX, .MemWrite_EX, .ALUOp_EX, .ImmSize_out_EX, .Da_EX, .Db_EX, .read_enable_EX, .WriteRegister_EX);
+    ID_EX_reg pipelining_ID_EX (.clk, .reset, .instr_ID, .setFlag_ID, .ALUSrc_ID, .MemToReg_ID, .RegWrite_ID, .MemWrite_ID, .ALUOp_ID, .ImmSize_out_ID, .Da_ID, .Db_ID, .read_enable_ID, .WriteRegister_ID,
+        .ALUSrc_EX, .instr_EX, .setFlag_EX, .MemToReg_EX, .RegWrite_EX, .MemWrite_EX, .ALUOp_EX, .ImmSize_out_EX, .Da_EX, .Db_EX, .read_enable_EX, .WriteRegister_EX);
 
 
     // ---------- execute ----------
@@ -119,8 +122,10 @@ module pipelined_cpu (reset, clk);
     // logic [63:0] ALU_out_EX;
     // logic ALUzeroFlag, negFlag, ovFlag;
     // logic [63:0] Din_EX;
-    EX execute (.reset, .ALUSrc_EX, .ALUOp_EX, .setFlag, .Da_EX, .Db_EX, .ImmSize_out_EX, .ALUzeroFlag, .negFlag, .ovFlag, .ALU_out_EX, .Din_EX, .branch);
 
+    EX execute (.reset, .ALUSrc_EX, .ALUOp_EX, .setFlag(setFlag_EX), .Da_EX, .Db_EX, .ImmSize_out_EX, .ALUzeroFlag, .ALU_neg, .ALU_ov, .ALU_cout, .ALU_out_EX, .Din_EX);
+
+    updateFlag flags (.clk, .reset, .setFlag(setFlag_EX), .negative(ALU_neg), .zero(ALUzeroFlag), .overflow(ALU_ov), .carryOut(ALU_cout), .negFlag, .zeroFlag, .ovFlag, .carryFlag);
     // ---------- EX to MEM reg ----------
     // input logic clk, reset;
     // input logic MemWrite_EX;
@@ -177,7 +182,7 @@ endmodule
 `timescale 1ps/1ps
 module pipelined_cpu_testbench ();
     logic reset, clk;
-    parameter ClockDelay = 15000;
+    parameter ClockDelay = 20000;
 
     pipelined_cpu dut (.*);
 

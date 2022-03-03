@@ -1,29 +1,26 @@
 // This module is the reg decode stage.
 // Controls passed on: ALUSrc, ALUOp, MemWE, Mem2Reg, and RegWE.
-module ID (clk, reset, instr_ID, instr_addr_ID, branch, ALUzeroFlag, WriteRegister_WB, RegWrite_WB, WriteData_WB,
-    ALUSrc_ID, MemToReg_ID, RegWrite_ID, MemWrite_ID, BrTaken_ID, ALUOp_ID, read_enable_ID, setFlag,
+module ID (clk, reset, instr_ID, instr_addr_ID, ALUzeroFlag, ovFlag, negFlag, WriteRegister_WB, RegWrite_WB, WriteData_WB,
+    ALUSrc_ID, MemToReg_ID, RegWrite_ID, MemWrite_ID, BrTaken_ID, ALUOp_ID, read_enable_ID, setFlag_ID,
     ImmSize_out_ID, Da_ID, Db_ID, branchVal, Rn, Reg2Loc_out, WriteRegister_ID,
-    WriteData_EX, WriteData_MEM, forwardA, forwardB);
+    WriteData_EX, WriteData_MEM, forwardA, forwardB, accel_zero, accel_lt, ALU_neg, ALU_ov);
     // input logic clk, reset;
     input logic clk, reset;
     input logic [31:0] instr_ID;
     input logic [63:0] instr_addr_ID;
-    input logic branch, ALUzeroFlag, RegWrite_WB;
+    input logic ALUzeroFlag, ovFlag, negFlag, ALU_neg, ALU_ov, RegWrite_WB;
     input logic [4:0] WriteRegister_WB;
     input logic [63:0] WriteData_WB;
-    //input logic [4:0] WriteRegister_EX;
-    //input logic [4:0] WriteRegister_MEM;
     input logic [63:0] WriteData_EX;
     input logic [63:0] WriteData_MEM;
     //input logic RegWrite_EX, RegWrite_MEM;
     input logic [1:0] forwardA, forwardB;
+    input logic accel_zero, accel_lt;
 
-    //input logic [63:0] EX_ALU_out, MEM_out;
-    //input logic [1:0] forward_control;
 
     output logic ALUSrc_ID, MemToReg_ID, RegWrite_ID, MemWrite_ID, BrTaken_ID;
     output logic [2:0] ALUOp_ID;
-    output logic read_enable_ID, setFlag;
+    output logic read_enable_ID, setFlag_ID;
     output logic [63:0] ImmSize_out_ID;
     output logic [63:0] Da_ID, Db_ID;
     output logic [63:0] branchVal;
@@ -34,9 +31,10 @@ module ID (clk, reset, instr_ID, instr_addr_ID, branch, ALUzeroFlag, WriteRegist
     logic UncondBr;
     logic shiftSel, immSize;
     logic Reg2Loc;
-    control main_control (.instr(instr_ID), .branch, .ALUzeroFlag,
+    logic cntrl_neg, cntrl_ov;
+    control main_control (.instr(instr_ID), .ALUzeroFlag(ALUzeroFlag | accel_zero), .overflow(cntrl_ov), .negative(cntrl_neg),
         .Reg2Loc, .ALUSrc(ALUSrc_ID), .MemToReg(MemToReg_ID), .RegWrite(RegWrite_ID), .MemWrite(MemWrite_ID), .BrTaken(BrTaken_ID), .UncondBr,
-        .ALUOp(ALUOp_ID), .setFlag, .shiftSel, .immSize, .read_enable(read_enable_ID));
+        .ALUOp(ALUOp_ID), .setFlag(setFlag_ID), .shiftSel, .immSize, .read_enable(read_enable_ID));
 
     // sign extend condAddr19 and BrAddr26 then shift left by 2
 	logic [63:0] SE_condAddr19, SE_BrAddr26;
@@ -72,13 +70,16 @@ module ID (clk, reset, instr_ID, instr_addr_ID, branch, ALUzeroFlag, WriteRegist
     regfile register (.ReadData1(Da), .ReadData2(Db), .WriteData(WriteData_WB),
         .ReadRegister1(Rn), .ReadRegister2(Reg2Loc_out), .WriteRegister(WriteRegister_WB), .RegWrite(RegWrite_WB), .clk(~clk)); // todo not clk
 
-    //forwarding_unit fwrd (.Aa(Reg2Loc_out), .Ab(Rn), .RegWrite_MEM, .WriteRegister_MEM, .RegWrite_EX, .WriteRegister_EX, .forwardA, .forwardB);
-    
+    // forwarding data
     mux3_1_multi #(64) muxA (.s0(forwardA), .a(Da), .b(WriteData_MEM), .c(WriteData_EX), .out(Da_ID));
     mux3_1_multi #(64) muxB (.s0(forwardB), .a(Db), .b(WriteData_MEM), .c(WriteData_EX), .out(Db_ID));
 
-    assign WriteRegister_ID = Rd;
+    // forwarding flags
+    mux2_1 mux_neg (.s0(accel_lt), .a(negFlag), .b(ALU_neg), .out(cntrl_neg));
+    mux2_1 mux_ov (.s0(accel_lt), .a(ovFlag), .b(ALU_ov), .out(cntrl_ov));
 
+    assign WriteRegister_ID = Rd;
+    
 
 endmodule
 
@@ -90,7 +91,7 @@ module ID_testbench ();
     logic clk, reset;
     logic [31:0] instr_ID;
     logic [63:0] instr_addr_ID;
-    logic branch, ALUzeroFlag, RegWrite_WB;
+    logic ALUzeroFlag, ovFlag, negFlag, ALU_neg, ALU_ov, RegWrite_WB;
     logic [4:0] WriteRegister_WB;
     logic [63:0] WriteData_WB;
     logic [63:0] WriteData_EX;
@@ -99,6 +100,7 @@ module ID_testbench ();
     //logic [4:0] WriteRegister_MEM;
     //logic RegWrite_EX, RegWrite_MEM;
     logic [1:0] forwardA, forwardB;
+    logic accel_zero, accel_lt;
 
     // outputs
     logic ALUSrc_ID, MemToReg_ID, RegWrite_ID, MemWrite_ID, BrTaken_ID;
