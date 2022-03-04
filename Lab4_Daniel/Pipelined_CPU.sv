@@ -90,7 +90,7 @@ module Pipelined_CPU_testbench();
 	initial begin
 		reset <= 1'b1; repeat(2)@(posedge clk);
 		reset <= 1'b0; @(posedge clk);
-		repeat(1500)@(posedge clk);
+		repeat(80)@(posedge clk);
 		$stop;
 	end
 endmodule

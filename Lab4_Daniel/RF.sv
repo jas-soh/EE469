@@ -76,6 +76,7 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	// Register File - must be on negedge clk
 	regfile regist (.ReadData1(Da_out), .ReadData2(Db_out), .WriteData(writeData), .ReadRegister1(instruction[9:5]),
 					 .ReadRegister2(readRegB), .WriteRegister, .RegWrite(writeEnable), .clk(nClk));
+					 
 	/* ------------------------ immediate values ------------------------ */
 	// sign extend imm12; zero extend imm9
 	assign imm12_ZE = {{52'd0}, {instruction[21:10]}};
@@ -111,12 +112,14 @@ module RF(clk, instruction, instr_addr, dataMem, ALUOut, writeData, readA, readB
 	
 	// ZERO check - not doing right thing
 	and #50 out (zeroFlag, ands[0], ands[1], ands[2], ands[3]);
-	/*---------------------- shifter -----------------------------------------*/
+
+	/*------------------------- shifter -----------------------------------------*/
 	// implement shifter
 	shifter shif (.value(readA), .direction(1'b1), .distance(instruction[15:10]), .result(shift_output));
-	/* --------------------- control - ---------------------------------------*/
+
+	/* -------------------------- control ---------------------------------------*/
 	// make sure output control signals match with RF. need it to also be output of this module
-	// 
+
 	logic controlNeg, controlOverflow;
 	// forwarding alu flags
 	mux2_1 forwardmuxNeg (.s0(forwardOpflags), .a(negative), .b(forwardNeg), .out(controlNeg));

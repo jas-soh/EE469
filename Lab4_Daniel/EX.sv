@@ -1,4 +1,16 @@
-// EXECUTE stage of the 5 stage pipeline
+// EXECUTE stage of the 5 stage 
+/*Inputs:
+    - ALUSrc: control signal to choose from DataB or immVal as imput B of ALU
+    - ALUOp: ALU operation
+    - immVal: immediate value that may go into ALU
+    - dataA: output from regFile, input to ALU
+    - dataB: output from regFile, possible input to ALU
+    - shift_result: result from shifter
+    - shiftSel: control to choose shiftSel or ALU out as output 
+Outputs:
+    - Flags: negative, zero, overflow, carry_out
+    - execute_output: output from execute stage, from ALUE or shifter
+    */
 module EX(ALUSrc, ALUOp, immVal, dataA, dataB, execute_output, negative, zero, overflow, carry_out, shiftSel, shift_result);
     input logic ALUSrc, shiftSel;
     input logic [2:0] ALUOp;

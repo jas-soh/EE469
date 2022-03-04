@@ -7,8 +7,6 @@ add wave -noupdate /Pipelined_CPU_testbench/dut/negative
 add wave -noupdate /Pipelined_CPU_testbench/dut/zero
 add wave -noupdate /Pipelined_CPU_testbench/dut/overflow
 add wave -noupdate /Pipelined_CPU_testbench/dut/carry_out
-add wave -noupdate /Pipelined_CPU_testbench/dut/s2/controlNeg
-add wave -noupdate /Pipelined_CPU_testbench/dut/s2/controlOverflow
 add wave -noupdate /Pipelined_CPU_testbench/dut/Flags
 add wave -noupdate -radix decimal /Pipelined_CPU_testbench/dut/branch_sum
 add wave -noupdate -radix decimal /Pipelined_CPU_testbench/dut/instr_addr_IF
@@ -60,10 +58,10 @@ add wave -noupdate /Pipelined_CPU_testbench/dut/regWrite_E_MEM
 add wave -noupdate /Pipelined_CPU_testbench/dut/mem_read_MEM
 add wave -noupdate /Pipelined_CPU_testbench/dut/regWrite_MEM
 add wave -noupdate /Pipelined_CPU_testbench/dut/mem_Din_MEM
-add wave -noupdate -childformat {{{/Pipelined_CPU_testbench/dut/s2/regist/registers[18]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[17]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[16]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[15]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[14]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[11]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[10]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[9]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[8]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[7]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[6]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[5]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[4]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[3]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[2]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[1]} -radix decimal} {{/Pipelined_CPU_testbench/dut/s2/regist/registers[0]} -radix decimal}} -expand -subitemconfig {{/Pipelined_CPU_testbench/dut/s2/regist/registers[18]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[17]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[16]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[15]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[14]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[11]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[10]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[9]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[8]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[7]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[6]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[5]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[4]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[3]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[2]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[1]} {-radix decimal} {/Pipelined_CPU_testbench/dut/s2/regist/registers[0]} {-radix decimal}} /Pipelined_CPU_testbench/dut/s2/regist/registers
+add wave -noupdate /Pipelined_CPU_testbench/dut/s2/regist/registers
 add wave -noupdate -radix decimal /Pipelined_CPU_testbench/dut/s4/mem/mem
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {720402 ps} 0}
+WaveRestoreCursors {{Cursor 1} {717099 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -79,4 +77,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {1404855 ps} {1662903 ps}
+WaveRestoreZoom {506168 ps} {1022264 ps}

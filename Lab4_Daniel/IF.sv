@@ -1,5 +1,12 @@
 
 // Instruction Fetch stage of the pipelined CPU
+/* Inputs:
+	- clk, reset
+	- branchVal: ammount to branch PC, coming from RF  
+	- BrTaken: Control signal to choose from PC+4 or branchVal
+Outputs: 
+	- instruction: instruction to excecute 
+	- instr_addr: Program counter */
 module IF(clk, reset, branchVal, BrTaken, instruction, instr_addr);
 	input logic clk, reset, BrTaken;
 	input logic [63:0] branchVal;
