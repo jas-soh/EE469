@@ -12,6 +12,7 @@ module Pipelined_CPU(reset, clk);
 	logic [63:0] instr_addr_IF, instr_addr_RF;
    	logic [31:0] instruction_IF, instruction_RF;
 
+	// stage 1 instruction fetch 
 	IF s1 (.clk, .reset, .branchVal(branch_sum), .BrTaken, .instruction(instruction_IF), .instr_addr(instr_addr_IF));
 	// refister fors stage 1-2
 	IF_RF_reg reg1 (.clk, .reset, .instr_addr_IF, .instruction_IF, .instr_addr_RF, .instruction_RF);
@@ -35,7 +36,10 @@ module Pipelined_CPU(reset, clk);
 		.regWrite_E(regWrite_E_RF), .sum_PCandImm(branch_sum), .BrTaken, .WriteRegister(regWrite_WB), .Rd(regWrite_RF),
 		.mem_read(mem_read_RF), .setFlag(setFlag_RF), .shiftSel(shiftSel_RF), .shift_output(shift_output_RF),
 		.negative(Flags[0]), .overflow(Flags[2]), .readRegB, .forwardNeg(negative), .forwardOver(overflow), .forwardOpflags);
+
+	// pass instruction[31:25] to next register 
 	assign instr_31_to_25_RF = instruction_RF[31:25];
+	// register in between regfile and execute stage
 	RF_EX_reg reg2 (.clk, .reset, .dataA_RF, .dataB_RF, .immVal_RF, .shift_output_RF, .ALUSrc_RF, .memWrite_E_RF, .MemToReg_RF, .regWrite_E_RF,
             .mem_read_RF, .setFlag_RF, .shiftSel_RF, .regWrite_RF, .ALUOp_RF, .instr_31_to_25_RF, .dataA_EX, .dataB_EX, .immVal_EX, .shift_output_EX,
             .ALUSrc_EX, .memWrite_E_EX, .MemToReg_EX, .regWrite_E_EX, .mem_read_EX, .setFlag_EX, .shiftSel_EX, .regWrite_EX, .ALUOp_EX, .instr_31_to_25_EX);
@@ -50,7 +54,7 @@ module Pipelined_CPU(reset, clk);
 	EX s3 (.ALUSrc(ALUSrc_EX), .ALUOp(ALUOp_EX), .immVal(immVal_EX), 
 		.dataA(dataA_EX), .dataB(dataB_EX), .execute_output(ALU_out_EX),
 		.negative, .zero, .overflow, .carry_out, .shiftSel(shiftSel_EX), .shift_result(shift_output_EX));
-
+	// register between stage 3 and 4
 	EX_MEM_reg  reg3 (.clk, .reset, .memWrite_E_EX, .MemToReg_EX, .regWrite_E_EX, .mem_read_EX, .ALU_out_EX, 
 			.regWrite_EX, .mem_Din_EX(dataB_EX), .memWrite_E_MEM, .MemToReg_MEM, .regWrite_E_MEM, .mem_read_MEM,
 			.ALU_out_MEM, .regWrite_MEM, .mem_Din_MEM);
@@ -59,7 +63,7 @@ module Pipelined_CPU(reset, clk);
 
 	MEM s4 (.clk, .reset, .MemWrite(memWrite_E_MEM), .dataMem_in(mem_Din_MEM), .mem_addr(ALU_out_MEM),
 			.writeBack(writeBack_mem), .mem_read(mem_read_MEM), .memToReg(MemToReg_MEM));
-
+	// register between stage 4 and 5
 	MEM_WB_reg  reg4 (.clk, .reset, .regWrite_E_MEM, .WriteData_MEM(writeBack_mem), .regWrite_MEM, 
 			.regWrite_E_WB, .WriteData_WB, .regWrite_WB); 
 	
@@ -67,6 +71,7 @@ module Pipelined_CPU(reset, clk);
 	// used output of MEM_WB register as write data inputs to EX stage
 
 	/*------------------------------------ forwarding unit -----------------------------------------*/
+	// outputs opcode for 3:1 mux for forwarding data and opcode for 2:1 mux for forwarding flags. 
 	forwarding_unit forwardUnit (.addr_A(instruction_RF[9:5]), .addr_B(readRegB), .write_reg_mem(regWrite_MEM),
 			.regWrite_E_mem(regWrite_E_MEM), .write_reg_alu(regWrite_EX), .regWrite_E_alu(regWrite_E_EX),
 			.forwardOp_A(fOp_A), .forwardOp_B(fOp_B), .instr_31_to_25_EX, .cur_instr_31_24(instruction_RF[31:24]), .forwardOpflags);
