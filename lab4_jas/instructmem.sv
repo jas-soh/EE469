@@ -55,7 +55,7 @@ module instructmem (
 			instruction = 'x;
 		else
 			instruction = mem[address/4];
-		//$display("instruction: = %0b", instruction);
+		$display("instruction: = %0b", instruction);
 	end
 		
 endmodule

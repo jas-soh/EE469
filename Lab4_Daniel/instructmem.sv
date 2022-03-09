@@ -7,11 +7,15 @@
 // `define BENCHMARK "../benchmarks/test02_AddsSubs.arm"
 // `define BENCHMARK "../benchmarks/test03_CbzB.arm"
 // `define BENCHMARK "../benchmarks/test04_LdurStur.arm"
-// `define BENCHMARK "../benchmarks/test05_Blt.arm"
+ `define BENCHMARK "../benchmarks/test05_Blt.arm"
 // `define BENCHMARK "../benchmarks/test06_AndEorLsr.arm"
 `define BENCHMARK "../benchmarks/test10_forwarding.arm"
 // `define BENCHMARK "../benchmarks/test11_Sort.arm"
+<<<<<<< HEAD
 // `define BENCHMARK "../benchmarks/test12_CRC16.arm"
+=======
+//`define BENCHMARK "../benchmarks/test12_CRC16.arm"
+>>>>>>> 26f335b910a5354db0ac5cf7f77955fb28228594
 `timescale 1ns/10ps
 
 // How many bytes are in our memory?  Must be a power of two.

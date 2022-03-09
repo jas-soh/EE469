@@ -10,14 +10,13 @@
 
 module program_counter (instruction, instr_addr, UncondBr, BrTaken, clk, reset);
 	output logic [31:0] instruction;
+	output logic [63:0] instr_addr;
 	input logic UncondBr, BrTaken; // control inputs
 	input logic clk, reset;
 	
-	output logic [63:0] instr_addr;
-	
 	// calculating PC+4
 	logic [63:0] PC4;
-	assign PC4 = instr_addr + 4;
+	assign PC4 = instr_addr + 4; // fix
 	
 	
 	// sign extend condAddr19 and BrAddr26 then shift left by 2
