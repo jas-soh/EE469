@@ -238,38 +238,193 @@ module lab5_testbench ();
 	
 	logic	[DATA_WIDTH-1:0][7:0]	dummy_data;
 	logic [ADDRESS_WIDTH-1:0]		addr;
-	int	i, delay, minval, maxval;
+	int	i, delay, minval, maxval, L1_block_Size, L1_num_blocks, L2_block_size, L2_num_blocks;
 	
 	initial begin
 		dummy_data <= '0;
 		resetMem();				// Initialize the memory.
-		
-		//Do 20 random reads.
+		/*-----------------------L1 cache block size test--------------------*/
+
+		//L1 cache block size test - check how many hits there are after a cold start
+		// block size = 8 * number of hits in between cold start + 1
+		$display("L1 block size test");
 		for (i=0; i<8; i++) begin
-			addr = i*8*4; // *8 to doubleword-align the access.
+			addr = i*8; // *8 to doubleword-align the access.
+			readMem(addr, dummy_data, delay);
+			$display("%t Read took %d cycles", $time, delay);
+		end
+		L1_block_Size = 32;
+		resetMem();
+		
+		/*-----------------------L1 number of blocks test--------------------*/
+		$display("L1 number of blocks test");
+		L1_num_blocks = 8; // guess and check
+		for (i=0; i<L1_num_blocks; i++) begin
+			addr = L1_block_Size*i; 
 			readMem(addr, dummy_data, delay);
 			$display("%t Read took %d cycles", $time, delay);
 		end
 		$display("End of loop1");
-		for (i=0; i<8; i++) begin
-			addr = i*8*4; // *8 to doubleword-align the access.
+		for (i=0; i<L1_num_blocks; i++) begin // ckeck if all hits
+			addr = L1_block_Size*i;
 			readMem(addr, dummy_data, delay);
 			$display("%t Read took %d cycles", $time, delay);
 		end
-		// $display("End of loop");
-		// addr = 128;
-		// readMem(addr, dummy_data, delay);
-		// $display("%t Read took %d cycles", $time, delay);
-		// addr = 0;
-		// readMem(addr, dummy_data, delay);
-		// $display("%t Read took %d cycles", $time, delay);
-		// Do 5 random double-word writes of random data.
-		// for (i=0; i<32; i++) begin
-		// 	addr = i*8; // *8 to doubleword-align the access.
-		// 	dummy_data = $random();
-		// 	writeMem(addr, dummy_data, 8'hFF, delay);
-		// 	$display("%t Write took %d cycles", $time, delay);
+		resetMem();
+
+		/*-----------------------L1 associativity test--------------------*/ 
+		$display("Associativity Test");
+		addr = 0;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = 0; // if hit, at least 2 way, if L1 miss, no associativity   
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		resetMem();
+
+		//write policy -- dont think we need this, evected data is pushed to lower levels - write back
+		$display("Write Policy");
+		addr = 0;
+		dummy_data = '0;
+		writeMem(addr, dummy_data, 8'hFF, delay);
+		$display("%t Write took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = 0;
+		readMem(addr, dummy_data, delay); // if this delay is same as cold start, write through
+		$display("%t Read took %d cycles", $time, delay); 
+		resetMem();
+
+		/*-----------------------L2 blocksize test--------------------*/
+		$display("L2 Blocksize test");	
+		addr = 0;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks * 2; // push addr0 to L2
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = 32;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks + 32; 
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks*2 + 32; // push addr8 to L2
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		
+		$display("Check below hits");
+		L2_block_size = 64;
+		for (i = 0; i < L2_block_size/8; i++) begin
+			addr = i*8; 
+			readMem(addr, dummy_data, delay);
+			$display("%t Read took %d cycles", $time, delay);
+		end
+		resetMem();
+
+		/*-----------------------L2 num blocks test--------------------*/
+		$display("L2 number of blocks test");
+		L2_num_blocks =16;
+		// fill L1
+		for (i=0; i<L1_num_blocks; i++) begin
+			addr = L1_block_Size*i; 
+			readMem(addr, dummy_data, delay);
+			// $display("%t Read took %d cycles", $time, delay);
+		end
+		$display("Filled L1");
+		for (i=L1_num_blocks; i<L2_num_blocks; i++) begin
+			addr = L1_block_Size*i; 
+			readMem(addr, dummy_data, delay);
+			$display("%t Read took %d cycles", $time, delay);
+		end
+		$display("Check below hits");
+		for (i=0; i<L2_num_blocks; i++) begin
+			addr = L2_block_size*i; 
+			readMem(addr, dummy_data, delay);
+			// make sure all of these are hits in L2, if not, L2_num_blocks is lower
+			$display("%t Read took %d cycles", $time, delay);
+		end
+		resetMem();
+
+		/*-----------------------L2 associativity test--------------------*/
+		$display("L2 associativity test");
+		addr = 0;
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L1_block_Size * L1_num_blocks; // push addr0 to L2
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L2_block_size * L2_num_blocks; 
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		addr = L2_block_size * L2_num_blocks* L1_num_blocks; // push above address into L2
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		$display("If below hit time is L2, then at least 2 way");
+		addr = 0; // push above to L2
+		readMem(addr, dummy_data, delay);
+		$display("%t Read took %d cycles", $time, delay);
+		// Fill L2
+		// for (i=0; i<8; i++) begin
+		// 	addr = i*8*4; // *8 to doubleword-align the access.
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
 		// end
+		// $display("Filled L1");
+		// // now send data above to L2
+		// for (i=8; i<33; i++) begin
+		// 	addr = i*8*4; // *8 to doubleword-align the access.
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// end
+		// $display("Sent to L2");
+		// for (i=0; i<24; i++) begin
+		// 	addr = i*8*4; // *8 to doubleword-align the access.
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// end
+
+		// L2 blocksize test
+		// for (i = 0; i < 8; i++) begin
+		// 	addr = 0;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	addr = 128;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	//push address 0 to L2
+		// 	addr = 256;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+
+		// 	addr = 32;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	addr = 160;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	// push address 8 to L2
+		// 	addr = 288;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	$display("Address 0 - 63 in L2");
+
+		// 	addr = i*8;
+		// 	readMem(addr, dummy_data, delay);
+		// 	$display("%t Read took %d cycles", $time, delay);
+		// 	$display("check if above is a hit in L2");
+
+		// end
+		// addr = 384;
+		// readMem(addr, dummy_data, delay);
+		// $display("%t Read took %d cycles", $time, delay);
 		
 		// Reset the memory.
 		resetMem();
